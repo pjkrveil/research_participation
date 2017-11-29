@@ -3,6 +3,11 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Dropout, Flatten, Dense, Input
 import keras
+import theano
+
+# SETTING FOR USING GPU
+theano.config.device = 'gpu'
+theano.config.floatX = 'float32'
 
 print("++ keras version is: v.")
 print(keras.__version__)
@@ -29,15 +34,13 @@ model = applications.VGG16(weights='imagenet',
                            classes=5089)
 
 
-# Truncate and replace softmax layer for transfer learning
-model.layers.pop()
-model.outputs = [model.layers[-1].output]
-model.layers[-1].outbound_nodes = []
-model.layers.add(Dense(5089, activation='softmax', name='predictions'))
-
-# Learning rate is changed to 0.001
-sgd = SGD(lr=1e-3, decay=1e-6, momentum=0.9, nesterov=True)
-model.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
+# CREATE A TOP MODEL
+top_model = Sequential()
+top_model.add(Flatten(input_shape=model.output_shape[1:]))
+top_model.add(Dense(256, activation='relu'))
+top_model.add(Dropout(0.5))
+top_model.add(Dense(1, activation='sigmoid'))
+top_model.load_weights(top_model_weights_path)
 
 
 # CREATE AN "REAL" MODEL FROM VGG16
@@ -52,7 +55,7 @@ for layer in new_model.layers:
 
 # COMPILE THE MODEL
 sgd = optimizers.SGD(lr=1e-4, decay=1e-6, momentum=0.9, nesterov=True)
-new_model.compile(optimizer=sgd, loss='binary_crossentropy', metrics=['accuracy'])
+new_model.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
 
 
 # CREATE THE IMAGE GENERATORS
