@@ -13,7 +13,6 @@ keras.backend.set_image_dim_ordering('tf')
 
 # SET ALL THE PARAMETERS
 weights_path = 'models/vgg16.h5'
-top_model_weights_path = 'bottleneck_fc_model.h5'
 img_width, img_height = 224, 224
 train_data_dir = '/data/pjkrveil/train_val_images'
 validation_data_dir = '/data/pjkrveil/train_val_images'
@@ -21,8 +20,6 @@ nb_train_samples = 500000
 nb_validation_samples = 79184
 epochs = 50
 batch_size = 50000
-
-
 
 # LOAD VGG16
 input_tensor = Input(shape=(224, 224, 3))
