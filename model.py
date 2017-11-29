@@ -1,8 +1,3 @@
-import theano
-# SETTING FOR USING GPU
-theano.config.device = 'gpu'
-theano.config.floatX = 'float32'
-
 from keras import applications, optimizers
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
