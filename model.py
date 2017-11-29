@@ -5,8 +5,7 @@ from keras.layers import Dropout, Flatten, Dense, Input
 import keras
 
 
-print("++ keras version is: v.")
-print(keras.__version__)
+print("++ keras version is: v." + keras.__version__)
 # OUTPUT: '2.0.8'
 
 keras.backend.set_image_dim_ordering('tf')
