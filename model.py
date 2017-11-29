@@ -29,13 +29,15 @@ model = applications.VGG16(weights='imagenet',
                            classes=5089)
 
 
-# CREATE A TOP MODEL
-top_model = Sequential()
-top_model.add(Flatten(input_shape=model.output_shape[1:]))
-top_model.add(Dense(4096, activation='relu'))
-top_model.add(Dropout(0.5))
-top_model.add(Dense(1, activation='softmax'))
-top_model.load_weights(top_model_weights_path)
+# Truncate and replace softmax layer for transfer learning
+model.layers.pop()
+model.outputs = [model.layers[-1].output]
+model.layers[-1].outbound_nodes = []
+model.add(Dense(5089, activation='softmax', name='predictions'))
+
+# Learning rate is changed to 0.001
+sgd = SGD(lr=1e-3, decay=1e-6, momentum=0.9, nesterov=True)
+model.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
 
 
 # CREATE AN "REAL" MODEL FROM VGG16
@@ -44,19 +46,13 @@ new_model = Sequential()
 for l in model.layers:
     new_model.add(l)
 
-
-# CONCATENATE THE TWO MODELS
-new_model.add(top_model)
-
 # LOCK THE TOP CONV LAYERS
 for layer in new_model.layers:
     layer.trainable = False
 
 # COMPILE THE MODEL
-new_model.compile(loss='binary_crossentropy',
-              optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
-              metrics=['accuracy'])
-
+sgd = optimizers.SGD(lr=1e-4, decay=1e-6, momentum=0.9, nesterov=True)
+new_model.compile(optimizer=sgd, loss='binary_crossentropy', metrics=['accuracy'])
 
 
 # CREATE THE IMAGE GENERATORS
