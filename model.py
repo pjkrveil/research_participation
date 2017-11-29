@@ -33,7 +33,7 @@ model = applications.VGG16(weights='imagenet',
 model.layers.pop()
 model.outputs = [model.layers[-1].output]
 model.layers[-1].outbound_nodes = []
-model.add(Dense(5089, activation='softmax', name='predictions'))
+model.layers.add(Dense(5089, activation='softmax', name='predictions'))
 
 # Learning rate is changed to 0.001
 sgd = SGD(lr=1e-3, decay=1e-6, momentum=0.9, nesterov=True)
